@@ -16,6 +16,9 @@ let tool = {
   },
   isObject(obj) {
     return obj !== null && typeof obj === 'object'
+  },
+  isArray(val) {
+    return val.constructor === Array
   }
 }
 

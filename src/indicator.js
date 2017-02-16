@@ -1,20 +1,15 @@
 /**
  * @author jsz
- * @description 指标管理类(单例模式)
+ * @description 指标管理类(容器,单例模式)
  */
 class IndicatorManager {
   static getInstance() {
     if (!IndicatorManager.instance) {
       IndicatorManager.instance = new IndicatorManager()
-      IndicatorManager.instance.indicators = []
-      IndicatorManager.instance.callback = {}
-      IndicatorManager.instance.mapper = { a: new Date().getMilliseconds() }
-      console.log(IndicatorManager.instance.mapper.a)
+      IndicatorManager.instance.handlerMapper = {}
+      IndicatorManager.instance.paramsMapper = {}
     }
     return IndicatorManager.instance
   }
 }
-
-let indicatorManager = IndicatorManager.getInstance()
-
-export default indicatorManager
+export default IndicatorManager.getInstance()

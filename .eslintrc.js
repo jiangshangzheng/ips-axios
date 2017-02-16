@@ -18,6 +18,8 @@ module.exports = {
     'space-before-function-paren': [0, 0],
     'space-after-keywords': 0,
     "space-in-parens": 0,
-    'no-undef': 0
+    'no-undef': 0,
+    // node中不能使用__dirname或__filename做路径拼接
+    "no-path-concat": 0
   }
 }

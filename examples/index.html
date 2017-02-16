@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>ips-http</title>
+  <link rel="stylesheet" type="text/css" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
+  <script src="ipshttp.min.js"></script>
+  <style>
+    * {
+      font-family: 'microsoft yahei'
+    }
+    
+    .code {
+      font-size: 16px;
+    }
+  </style>
+</head>
+
+<body class="container">
+  <h1>ips-http</h1>
+  <div class="well">
+    <h3>查询/订阅指标(单个指标)</h3>
+    <pre class="code">
+ips.http.getData('s0102', {region_id: -212931231}, function(response) {
+    console.log(JSON.stringify(response.data))
+})
+    </pre>
+  </div>
+  <div class="well">
+    <h3>查询/订阅指标(多个指标)</h3>
+    <pre class="code">
+ips.http.getData(['s0102','s0103'], {'s0103':{region_id: -212931231}}, function(ret1,ret2) {
+    console.log(JSON.stringify(ret1.data))
+    console.log(JSON.stringify(ret1.data))
+})
+    </pre>
+    </form>
+  </div>
+
+  <div class="well">
+    <h3>查询/订阅指标(多个指标)</h3>
+    <pre class="code">
+ips.http.triggerUpdate('s0102')
+    </pre>
+    </form>
+  </div>
+  <script>
+    ips.http.getData('s0101', {
+      region_id: -212931231
+    }, function(response) {
+      console.log(JSON.stringify(response.data))
+    })
+
+    ips.http.getData('s0104', {
+      region_id: -212931231
+    }, function(response) {
+      console.log(JSON.stringify(response.data))
+    })
+    
+    ips.http.getData(['s0102', 's0103'], {
+      's0103': {
+        region_id: -212931231
+      }
+    }, function(ret1, ret2) {
+      console.log(JSON.stringify(ret1.data))
+      console.log(JSON.stringify(ret2.data))
+    })
+
+    setTimeout(function() {
+      ips.http.triggerUpdate('s0101')
+      ips.http.triggerUpdate('s0102')
+      ips.http.triggerUpdate('s0101')
+    }, 4000)
+  </script>
+</body>
+
+</html>
