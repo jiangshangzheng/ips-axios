@@ -4,15 +4,18 @@
 * 对外统一提供指标查询接口
   ``` 
   单指标 :
-    ipshttp.getData(id,params,callback)
+
+  ipshttp.getData(id,params,callback)
 
   多指标 : 
-    ipshttp.getData([id],params,callback)
+
+  ipshttp.getData([id1,id2],{id1:params1,id2:params2},callback)
   ```
 * 对外提供消息触发更新接口
   ``` 
   ipshttp.triggerUpdate(id)
   ```
+
 ## 安装
 
 * npm 安装
