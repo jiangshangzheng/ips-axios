@@ -4,7 +4,7 @@
 <head>
   <title>ips-http</title>
   <link rel="stylesheet" type="text/css" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
-  <script src="ipshttp.min.js"></script>
+  <script src="ipsAxios.min.js"></script>
   <style>
     * {
       font-family: 'microsoft yahei'
@@ -21,7 +21,7 @@
   <div class="well">
     <h3>查询/订阅指标(单个指标)</h3>
     <pre class="code">
-ips.http.getData('s0102', {region_id: -212931231}, function(response) {
+ipsAxios.indiManager.getData('s0102', {region_id: -212931231}, function(response) {
     console.log(JSON.stringify(response.data))
 })
     </pre>
@@ -29,7 +29,7 @@ ips.http.getData('s0102', {region_id: -212931231}, function(response) {
   <div class="well">
     <h3>查询/订阅指标(多个指标)</h3>
     <pre class="code">
-ips.http.getData(['s0102','s0103'], {'s0103':{region_id: -212931231}}, function(ret1,ret2) {
+ipsAxios.indiManager.getData(['s0102','s0103'], {'s0103':{region_id: -212931231}}, function(ret1,ret2) {
     console.log(JSON.stringify(ret1.data))
     console.log(JSON.stringify(ret1.data))
 })
@@ -45,19 +45,19 @@ ips.http.triggerUpdate('s0102')
     </form>
   </div>
   <script>
-    ips.http.getData('s0101', {
+    ipsAxios.indi.get('s0101', {
       region_id: -212931231
     }, function(response) {
       console.log(JSON.stringify(response.data))
     })
 
-    ips.http.getData('s0104', {
+    ipsAxios.indi.get('s0104', {
       region_id: -212931231
     }, function(response) {
       console.log(JSON.stringify(response.data))
     })
     
-    ips.http.getData(['s0102', 's0103'], {
+    ipsAxios.indi.get(['s0102', 's0103'], {
       's0103': {
         region_id: -212931231
       }
@@ -67,9 +67,9 @@ ips.http.triggerUpdate('s0102')
     })
 
     setTimeout(function() {
-      ips.http.triggerUpdate('s0101')
-      ips.http.triggerUpdate('s0102')
-      ips.http.triggerUpdate('s0101')
+      ipsAxios.indi.update('s0101')
+      ipsAxios.indi.update('s0102')
+      ipsAxios.indi.update('s0101')
     }, 4000)
   </script>
 </body>

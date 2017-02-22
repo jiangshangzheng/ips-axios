@@ -50,11 +50,11 @@ var server = http.createServer(function(request, response) {
     response.end(JSON.stringify({
       date: new Date().getMilliseconds(),
       key: reqUrl[reqUrl.length - 1].split('?')[0],
-      params: parseQueryString(reqUrl[reqUrl.length - 1]),
+      params: parseQueryString(reqUrl[reqUrl.length - 1])
     }))
   } else { // 访问HTML
     var pathname = url.parse(request.url).pathname
-    var realPath = __dirname + pathname
+    var realPath = __dirname + '/examples/' + pathname
     var ext = path.extname(realPath).slice(1)
     fs.exists(realPath, function(exists) {
       if (!exists) {

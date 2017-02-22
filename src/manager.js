@@ -1,16 +1,21 @@
 import axios from 'axios'
-import indicatorManager from './indicator'
-import { isString, isArray } from './tool'
+import container from './container'
+import { isString, isArray } from './helper'
 
-window.axios = axios
-
-let http = {
+let manager = {
+  apiUrl: '/api/indicator/',
+  /**
+  * @param {any} url 指标查询接口URL
+   */
+  setApiUrl(url) {
+    this.apiUrl = url
+  },
   /**
    * @param {any} keys 指标ID, 类型:String或者数组
    * @param {any} params 指标参数,每个ID对于一个JSON
    * @param {any} callback 回调方法
    */
-  getData(indicatorIds, params, callback) {
+  get(indicatorIds, params, callback) {
     if (!indicatorIds) {
       return
     }
@@ -18,8 +23,8 @@ let http = {
     if (isString(indicatorIds)) {
       // 单个指标
       key = indicatorIds
-      indicatorManager.paramsMapper[key] = params
-      indicatorManager.handlerMapper[key] = callback
+      container.paramsMapper[key] = params
+      container.handlerMapper[key] = callback
       this.mataGetData(key, params).then(response => {
         callback(response)
       }).catch(error => {
@@ -29,10 +34,10 @@ let http = {
       // 多个指标
       key = indicatorIds.join('$$')
         // 设置回调函数
-      indicatorManager.handlerMapper[key] = callback
+      container.handlerMapper[key] = callback
       indicatorIds.forEach(item => {
         // 设置指标参数
-        indicatorManager.paramsMapper[item] = params[item]
+        container.paramsMapper[item] = params[item]
       })
       let retData = []
       indicatorIds.forEach(item => {
@@ -46,19 +51,19 @@ let http = {
     }
   },
   mataGetData(indicatorId, params = {}) {
-    return axios.get('api/getData/' + indicatorId, { params: params })
+    return axios.get(this.apiUrl + indicatorId, { params: params })
   },
-  triggerUpdate(indicatorId) {
+  update(indicatorId) {
     if (indicatorId === '' || indicatorId === null) {
       return
     }
     if (isString(indicatorId)) {
-      for (var key in indicatorManager.handlerMapper) {
+      for (var key in container.handlerMapper) {
         if (key.indexOf(indicatorId) > -1) {
           let indicators = key.split('$$')
-          let handler = indicatorManager.handlerMapper[key]
+          let handler = container.handlerMapper[key]
           if (indicators.length === 1) {
-            this.mataGetData(key, indicatorManager.paramsMapper[key]).then(response => {
+            this.mataGetData(key, container.paramsMapper[key]).then(response => {
               handler(response)
             }).catch(error => {
               console.log(error)
@@ -67,7 +72,7 @@ let http = {
             console.log('关联指标:' + key)
             let retData = []
             indicators.forEach(item => {
-              retData.push(this.mataGetData(item, indicatorManager.paramsMapper[item]))
+              retData.push(this.mataGetData(item, container.paramsMapper[item]))
             })
             axios.all(retData).then(axios.spread(handler)).catch(error => {
               console.log(error)
@@ -81,4 +86,7 @@ let http = {
   }
 }
 
-export default http
+export default {
+  manager,
+  axios
+}

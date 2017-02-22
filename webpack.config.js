@@ -1,7 +1,7 @@
 const webpack = require('webpack')
 const env = require('yargs').argv.env
 
-let libraryName = 'ipshttp'
+let libraryName = 'ipsAxios'
 let plugins = []
 let outputFile
 
@@ -13,8 +13,7 @@ if (env === 'build') {
 }
 
 const config = {
-  entry: __dirname + '/src/index.js',
-  devtool: 'source-map',
+  entry: __dirname + '/src/main.js',
   output: {
     path: __dirname + '/dist',
     filename: outputFile,

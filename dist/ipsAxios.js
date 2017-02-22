@@ -2,11 +2,11 @@
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
 	else if(typeof define === 'function' && define.amd)
-		define("ipshttp", [], factory);
+		define("ipsAxios", [], factory);
 	else if(typeof exports === 'object')
-		exports["ipshttp"] = factory();
+		exports["ipsAxios"] = factory();
 	else
-		root["ipshttp"] = factory();
+		root["ipsAxios"] = factory();
 })(this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 30);
+/******/ 	return __webpack_require__(__webpack_require__.s = 29);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -941,23 +941,124 @@ process.umask = function() { return 0; };
 "use strict";
 
 
-var _http = __webpack_require__(27);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
-var _http2 = _interopRequireDefault(_http);
+var _axios = __webpack_require__(9);
+
+var _axios2 = _interopRequireDefault(_axios);
+
+var _container = __webpack_require__(27);
+
+var _container2 = _interopRequireDefault(_container);
+
+var _helper = __webpack_require__(28);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-if (!window.ips) {
-  window.ips = {};
-} /**
-   * 提供对外接口
-   * 1: 指标查询接口
-   * 2: Axios原生查询支持及原生配置管理
-   * 3: 消息接收接口,接收更新数据消息,触发更新
+var manager = {
+  apiUrl: '/api/indicator/',
+  /**
+  * @param {any} url 指标查询接口URL
    */
+  setApiUrl: function setApiUrl(url) {
+    this.apiUrl = url;
+  },
 
+  /**
+   * @param {any} keys 指标ID, 类型:String或者数组
+   * @param {any} params 指标参数,每个ID对于一个JSON
+   * @param {any} callback 回调方法
+   */
+  get: function get(indicatorIds, params, callback) {
+    var _this = this;
 
-window.ips.http = _http2.default;
+    if (!indicatorIds) {
+      return;
+    }
+    var key = void 0;
+    if ((0, _helper.isString)(indicatorIds)) {
+      // 单个指标
+      key = indicatorIds;
+      _container2.default.paramsMapper[key] = params;
+      _container2.default.handlerMapper[key] = callback;
+      this.mataGetData(key, params).then(function (response) {
+        callback(response);
+      }).catch(function (error) {
+        console.log(error);
+      });
+    } else if ((0, _helper.isArray)(indicatorIds)) {
+      (function () {
+        // 多个指标
+        key = indicatorIds.join('$$');
+        // 设置回调函数
+        _container2.default.handlerMapper[key] = callback;
+        indicatorIds.forEach(function (item) {
+          // 设置指标参数
+          _container2.default.paramsMapper[item] = params[item];
+        });
+        var retData = [];
+        indicatorIds.forEach(function (item) {
+          retData.push(_this.mataGetData(item, params[item]));
+        });
+        _axios2.default.all(retData).then(_axios2.default.spread(callback)).catch(function (error) {
+          console.log(error);
+        });
+      })();
+    } else {
+      return;
+    }
+  },
+  mataGetData: function mataGetData(indicatorId) {
+    var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+    return _axios2.default.get(this.apiUrl + indicatorId, { params: params });
+  },
+  update: function update(indicatorId) {
+    var _this2 = this;
+
+    if (indicatorId === '' || indicatorId === null) {
+      return;
+    }
+    if ((0, _helper.isString)(indicatorId)) {
+      for (var key in _container2.default.handlerMapper) {
+        if (key.indexOf(indicatorId) > -1) {
+          (function () {
+            var indicators = key.split('$$');
+            var handler = _container2.default.handlerMapper[key];
+            if (indicators.length === 1) {
+              _this2.mataGetData(key, _container2.default.paramsMapper[key]).then(function (response) {
+                handler(response);
+              }).catch(function (error) {
+                console.log(error);
+              });
+            } else {
+              (function () {
+                console.log('关联指标:' + key);
+                var retData = [];
+                indicators.forEach(function (item) {
+                  retData.push(_this2.mataGetData(item, _container2.default.paramsMapper[item]));
+                });
+                _axios2.default.all(retData).then(_axios2.default.spread(handler)).catch(function (error) {
+                  console.log(error);
+                });
+              })();
+            }
+          })();
+        }
+      }
+    } else {
+      console.log('指标ID类型错误');
+    }
+  }
+};
+
+exports.default = {
+  manager: manager,
+  axios: _axios2.default
+};
+module.exports = exports['default'];
 
 /***/ }),
 /* 9 */
@@ -1811,123 +1912,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _axios = __webpack_require__(9);
-
-var _axios2 = _interopRequireDefault(_axios);
-
-var _indicator = __webpack_require__(28);
-
-var _indicator2 = _interopRequireDefault(_indicator);
-
-var _tool = __webpack_require__(29);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-window.axios = _axios2.default;
-
-var http = {
-  /**
-   * @param {any} keys 指标ID, 类型:String或者数组
-   * @param {any} params 指标参数,每个ID对于一个JSON
-   * @param {any} callback 回调方法
-   */
-  getData: function getData(indicatorIds, params, callback) {
-    var _this = this;
-
-    if (!indicatorIds) {
-      return;
-    }
-    var key = void 0;
-    if ((0, _tool.isString)(indicatorIds)) {
-      // 单个指标
-      key = indicatorIds;
-      _indicator2.default.paramsMapper[key] = params;
-      _indicator2.default.handlerMapper[key] = callback;
-      this.mataGetData(key, params).then(function (response) {
-        callback(response);
-      }).catch(function (error) {
-        console.log(error);
-      });
-    } else if ((0, _tool.isArray)(indicatorIds)) {
-      (function () {
-        // 多个指标
-        key = indicatorIds.join('$$');
-        // 设置回调函数
-        _indicator2.default.handlerMapper[key] = callback;
-        indicatorIds.forEach(function (item) {
-          // 设置指标参数
-          _indicator2.default.paramsMapper[item] = params[item];
-        });
-        var retData = [];
-        indicatorIds.forEach(function (item) {
-          retData.push(_this.mataGetData(item, params[item]));
-        });
-        _axios2.default.all(retData).then(_axios2.default.spread(callback)).catch(function (error) {
-          console.log(error);
-        });
-      })();
-    } else {
-      return;
-    }
-  },
-  mataGetData: function mataGetData(indicatorId) {
-    var params = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-    return _axios2.default.get('api/getData/' + indicatorId, { params: params });
-  },
-  triggerUpdate: function triggerUpdate(indicatorId) {
-    var _this2 = this;
-
-    if (indicatorId === '' || indicatorId === null) {
-      return;
-    }
-    if ((0, _tool.isString)(indicatorId)) {
-      for (var key in _indicator2.default.handlerMapper) {
-        if (key.indexOf(indicatorId) > -1) {
-          (function () {
-            var indicators = key.split('$$');
-            var handler = _indicator2.default.handlerMapper[key];
-            if (indicators.length === 1) {
-              _this2.mataGetData(key, _indicator2.default.paramsMapper[key]).then(function (response) {
-                handler(response);
-              }).catch(function (error) {
-                console.log(error);
-              });
-            } else {
-              (function () {
-                console.log('关联指标:' + key);
-                var retData = [];
-                indicators.forEach(function (item) {
-                  retData.push(_this2.mataGetData(item, _indicator2.default.paramsMapper[item]));
-                });
-                _axios2.default.all(retData).then(_axios2.default.spread(handler)).catch(function (error) {
-                  console.log(error);
-                });
-              })();
-            }
-          })();
-        }
-      }
-    } else {
-      console.log('指标ID类型错误');
-    }
-  }
-};
-
-exports.default = http;
-module.exports = exports['default'];
-
-/***/ }),
-/* 28 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1960,7 +1944,7 @@ exports.default = IndicatorManager.getInstance();
 module.exports = exports["default"];
 
 /***/ }),
-/* 29 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1972,23 +1956,15 @@ Object.defineProperty(exports, "__esModule", {
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var tool = {
-  getQueryString: function getQueryString(name) {
-    var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
-    var r = window.location.search.substr(1).match(reg);
-    if (r != null) {
-      return unescape(r[2]);
-    }
-    return null;
+exports.default = {
+  isFunction: function isFunction(val) {
+    return typeof val === 'function';
   },
   isString: function isString(val) {
     return typeof val === 'string';
   },
   isBoolean: function isBoolean(val) {
     return val === true || val === false;
-  },
-  isFunction: function isFunction(val) {
-    return typeof val === 'function';
   },
   isObject: function isObject(obj) {
     return obj !== null && (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) === 'object';
@@ -1997,19 +1973,27 @@ var tool = {
     return val.constructor === Array;
   }
 };
-
-exports.default = tool;
 module.exports = exports['default'];
 
 /***/ }),
-/* 30 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(8);
-(function webpackMissingModule() { throw new Error("Cannot find module \"build\""); }());
+"use strict";
 
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _manager = __webpack_require__(8);
+
+_manager.axios.indi = _manager.manager;
+
+exports.default = _manager.axios;
+module.exports = exports['default'];
 
 /***/ })
 /******/ ]);
 });
-//# sourceMappingURL=ipshttp.js.map
+//# sourceMappingURL=ipsAxios.js.map
