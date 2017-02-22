@@ -31,6 +31,7 @@
   ```
   npm install ips-axios
   ```
+  
 * 标签引入
   ```
   <script src="../ipsAxios.min.js"></script>
